@@ -54,11 +54,12 @@ if archivo_imagen:
     try:
         contenido = archivo_imagen.read()
         imagen = Image.open(BytesIO(contenido))
+        imagen.load()  # Forzar la carga
+
         st.image(imagen, caption="Imagen cargada")
 
         imagen_preparada = preparar_imagen_vgg16(imagen)
 
-        # --- Cargar modelo e inferencia ---
         modelo = cargar_modelo()
         salida_predicha = modelo.predict(imagen_preparada)
 
@@ -71,6 +72,9 @@ if archivo_imagen:
         if st.checkbox("Mostrar probabilidades por clase"):
             st.bar_chart(salida_predicha[0])
 
+    except UnidentifiedImageError:
+        st.error("El archivo no es una imagen válida o está corrupto.")
     except Exception as e:
         st.error(f"No se pudo cargar o procesar la imagen. Detalles: {e}")
+
 
