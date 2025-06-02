@@ -7,24 +7,25 @@ import os
 
 # --- Ruta y descarga del modelo desde Google Drive ---
 MODEL_PATH = "model_Sergio_v2_os.keras"
-FILE_ID = "1RbJjbe6bWn-rXbxIwHijYoNezuB1vQl6"
-DOWNLOAD_URL = f"https://drive.google.com/uc?id={FILE_ID}"
+DOWNLOAD_URL = "https://drive.google.com/file/d/1RbJjbe6bWn-rXbxIwHijYoNezuB1vQl6/view?usp=sharing"
 
 @st.cache_resource
 def cargar_modelo():
     if not os.path.exists(MODEL_PATH):
         with st.spinner("Descargando modelo desde Google Drive..."):
-            gdown.download(DOWNLOAD_URL, MODEL_PATH, quiet=False)
+            gdown.download(DOWNLOAD_URL, MODEL_PATH, fuzzy=True, quiet=False)
+        # Verificación del tamaño del archivo
+        st.write("✅ Modelo descargado. Tamaño:", os.path.getsize(MODEL_PATH), "bytes")
     with st.spinner("Cargando modelo..."):
         modelo = tf.keras.models.load_model(MODEL_PATH)
     return modelo
 
 # --- Preprocesamiento para VGG16 ---
 def preparar_imagen_vgg16(imagen):
-    imagen = imagen.convert("RGB")  # Asegurar que tenga 3 canales
-    imagen = imagen.resize((224, 224))  # Tamaño requerido por VGG16
-    matriz = np.array(imagen).astype(np.float32) / 255.0  # Normalizar
-    matriz = np.expand_dims(matriz, axis=0)  # Añadir dimensión de batch
+    imagen = imagen.convert("RGB")
+    imagen = imagen.resize((224, 224))
+    matriz = np.array(imagen).astype(np.float32) / 255.0
+    matriz = np.expand_dims(matriz, axis=0)
     return matriz
 
 # --- Etiquetas del modelo ---
