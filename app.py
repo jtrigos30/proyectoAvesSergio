@@ -15,7 +15,15 @@ def cargar_modelo():
     if not os.path.exists(MODEL_PATH):
         with st.spinner("Descargando modelo desde Google Drive..."):
             gdown.download(DOWNLOAD_URL, MODEL_PATH, quiet=False)
+
+    # Validar si el archivo es sospechosamente pequeño (posiblemente falló la descarga)
+    if os.path.exists(MODEL_PATH) and os.path.getsize(MODEL_PATH) < 10000:
+        st.warning("⚠️ El archivo del modelo parece estar corrupto o incompleto. Eliminando y reintentando...")
+        os.remove(MODEL_PATH)
+        with st.spinner("Descargando nuevamente el modelo..."):
+            gdown.download(DOWNLOAD_URL, MODEL_PATH, quiet=False)
         st.write("✅ Modelo descargado. Tamaño:", os.path.getsize(MODEL_PATH), "bytes")
+
     with st.spinner("Cargando modelo..."):
         modelo = tf.keras.models.load_model(MODEL_PATH)
     return modelo
