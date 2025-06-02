@@ -1,6 +1,6 @@
 import streamlit as st
 import numpy as np
-from PIL import Image
+from PIL import Image, UnidentifiedImageError
 import tensorflow as tf
 import gdown
 import os
