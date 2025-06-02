@@ -2,62 +2,37 @@ import streamlit as st
 import numpy as np
 from PIL import Image, UnidentifiedImageError
 import tensorflow as tf
+import gdown
 import os
-import requests
 
-# --- Configuración del modelo ---
+# --- ID del archivo en Google Drive y nombre local ---
+MODEL_ID = "1RbJjbe6bWn-rXbxIwHijYoNezuB1vQl6"
 MODEL_PATH = "model_Sergio_v2_os.keras"
-FILE_ID = "1RbJjbe6bWn-rXbxIwHijYoNezuB1vQl6"
-DOWNLOAD_URL = f"https://drive.google.com/uc?export=download&id={FILE_ID}"
 
-# --- Función para descargar archivos grandes de Google Drive ---
-def descargar_modelo_desde_drive(destination):
-    st.write("Descargando el modelo desde Google Drive...")
-
-    session = requests.Session()
-    response = session.get(DOWNLOAD_URL, stream=True)
-    
-    # Verificar si Google requiere confirmación por tamaño del archivo
-    for key, value in response.cookies.items():
-        if key.startswith('download_warning'):
-            confirm_token = value
-            params = {'id': FILE_ID, 'confirm': confirm_token}
-            response = session.get(DOWNLOAD_URL, params=params, stream=True)
-            break
-
-    if response.status_code == 200:
-        with open(destination, "wb") as f:
-            for chunk in response.iter_content(32 * 1024):
-                if chunk:
-                    f.write(chunk)
-        st.write("✅ Modelo descargado correctamente.")
-    else:
-        st.error("❌ Error al descargar el modelo.")
-        raise RuntimeError("No se pudo descargar el modelo desde Google Drive.")
-
-# --- Carga y validación del modelo ---
 @st.cache_resource
 def cargar_modelo():
-    st.write("Verificando si el modelo existe en ruta:", MODEL_PATH)
-    
+    st.write("🔍 Verificando si el modelo existe en ruta:", MODEL_PATH)
+
     if not os.path.exists(MODEL_PATH):
-        descargar_modelo_desde_drive(MODEL_PATH)
+        st.warning("📦 Modelo no encontrado. Descargando desde Google Drive...")
+        gdown.download(id=MODEL_ID, output=MODEL_PATH, quiet=False)
 
     if os.path.exists(MODEL_PATH):
         size = os.path.getsize(MODEL_PATH)
-        st.write(f"Tamaño del archivo del modelo: {size} bytes")
-        if size < 10000:
+        st.write(f"📏 Tamaño del archivo: {size} bytes")
+        if size < 100000:  # Menos de 100 KB es claramente inválido
             st.warning("⚠️ El archivo parece corrupto. Eliminando y reintentando descarga...")
             os.remove(MODEL_PATH)
-            descargar_modelo_desde_drive(MODEL_PATH)
-
+            with st.spinner("Reintentando descarga del modelo..."):
+                gdown.download(id=MODEL_ID, output=MODEL_PATH, quiet=False)
+            st.success("✅ Modelo descargado correctamente.")
     else:
-        st.error("❌ El archivo del modelo no existe tras la descarga.")
-        raise FileNotFoundError("Fallo en la descarga del modelo.")
+        st.error("❌ No se pudo encontrar ni descargar el modelo.")
+        return None
 
-    st.write("🧠 Cargando el modelo...")
+    st.info("🧠 Cargando el modelo...")
     modelo = tf.keras.models.load_model(MODEL_PATH)
-    st.write("✅ Modelo cargado exitosamente.")
+    st.success("✅ Modelo cargado exitosamente.")
     return modelo
 
 # --- Preprocesamiento para VGG16 ---
@@ -75,11 +50,11 @@ etiquetas = [
     'CHIPE ARROYERO/CHARQUERO', 'CHIPE ALAS AMARILLAS'
 ]
 
-# --- Interfaz de la aplicación ---
+# --- Título de la app ---
 st.title("🦜 Clasificación de Aves con VGG16 + Keras")
 st.write("Sube una imagen de un ave para predecir su especie.")
 
-# --- Cargar imagen del usuario ---
+# --- Subida de imagen ---
 archivo_imagen = st.file_uploader("Selecciona una imagen", type=["jpg", "jpeg", "png"])
 
 if archivo_imagen:
@@ -89,19 +64,22 @@ if archivo_imagen:
 
         imagen_preparada = preparar_imagen_vgg16(imagen)
         modelo = cargar_modelo()
-        salida_predicha = modelo.predict(imagen_preparada)
+        if modelo is None:
+            st.error("No se pudo cargar el modelo.")
+        else:
+            salida_predicha = modelo.predict(imagen_preparada)
+            clase = int(np.argmax(salida_predicha))
+            confianza = float(np.max(salida_predicha))
 
-        clase = int(np.argmax(salida_predicha))
-        confianza = float(np.max(salida_predicha))
+            st.success(f"🧠 Predicción: *{etiquetas[clase]}*")
+            st.info(f"📊 Confianza: *{confianza*100:.2f}%*")
 
-        st.success(f"🧠 Predicción: *{etiquetas[clase]}*")
-        st.info(f"📊 Confianza del modelo: *{confianza*100:.2f}%*")
-
-        if st.checkbox("Mostrar probabilidades por clase"):
-            st.bar_chart(salida_predicha[0])
+            if st.checkbox("Mostrar probabilidades por clase"):
+                st.bar_chart(salida_predicha[0])
 
     except UnidentifiedImageError:
-        st.error("❌ No se pudo cargar la imagen: formato no reconocido o archivo corrupto.")
+        st.error("❌ Imagen no válida o corrupta.")
     except Exception as e:
         st.error(f"❌ No se pudo procesar la imagen. Detalles: {e}")
+
 
