@@ -3,3 +3,4 @@ Pillow>=9.4.0
 tensorflow==2.10.0
 streamlit>=1.44.1
 gdown>=4.7.1
+keras==2.10.0  
