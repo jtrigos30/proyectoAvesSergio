@@ -8,7 +8,7 @@ from io import BytesIO
 
 # --- Ruta y descarga del modelo desde Google Drive ---
 MODEL_PATH = "model_Sergio_v2_os.keras"
-DOWNLOAD_URL = "https://drive.google.com/file/d/1RbJjbe6bWn-rXbxIwHijYoNezuB1vQl6/view?usp=sharing"
+DOWNLOAD_URL = "https://drive.google.com/uc?id=1RbJjbe6bWn-rXbxIwHijYoNezuB1vQl6"
 
 @st.cache_resource
 def cargar_modelo():
@@ -52,7 +52,8 @@ archivo_imagen = st.file_uploader("Selecciona una imagen", type=["jpg", "jpeg", 
 
 if archivo_imagen:
     try:
-        imagen = Image.open(BytesIO(archivo_imagen.read()))
+        contenido = archivo_imagen.read()
+        imagen = Image.open(BytesIO(contenido))
         st.image(imagen, caption="Imagen cargada")
 
         imagen_preparada = preparar_imagen_vgg16(imagen)
@@ -67,7 +68,6 @@ if archivo_imagen:
         st.success(f"🧠 Predicción: *{etiquetas[clase]}*")
         st.info(f"📊 Confianza del modelo: *{confianza*100:.2f}%*")
 
-        # --- Visualización opcional ---
         if st.checkbox("Mostrar probabilidades por clase"):
             st.bar_chart(salida_predicha[0])
 
