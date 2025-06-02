@@ -4,7 +4,6 @@ from PIL import Image, UnidentifiedImageError
 import tensorflow as tf
 import gdown
 import os
-from io import BytesIO
 
 # --- Ruta y descarga del modelo desde Google Drive ---
 MODEL_PATH = "model_Sergio_v2_os.keras"
@@ -54,7 +53,7 @@ if archivo_imagen:
     try:
         imagen = Image.open(archivo_imagen)  # abrir directo, sin BytesIO ni .read()
         st.image(imagen, caption="Imagen cargada")
-        
+
         imagen_preparada = preparar_imagen_vgg16(imagen)
         modelo = cargar_modelo()
         salida_predicha = modelo.predict(imagen_preparada)
