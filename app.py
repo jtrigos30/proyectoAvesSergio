@@ -45,7 +45,7 @@ archivo_imagen = st.file_uploader("Selecciona una imagen", type=["jpg", "jpeg", 
 if archivo_imagen:
     try:
         imagen = Image.open(BytesIO(archivo_imagen.read()))
-        st.image(imagen, caption="Imagen cargada", use_container_width=True)
+        st.image(imagen, caption="Imagen cargada")
 
         imagen_preparada = preparar_imagen_vgg16(imagen)
 
@@ -65,3 +65,4 @@ if archivo_imagen:
 
     except Exception as e:
         st.error(f"No se pudo cargar o procesar la imagen. Detalles: {e}")
+
