@@ -52,14 +52,10 @@ archivo_imagen = st.file_uploader("Selecciona una imagen", type=["jpg", "jpeg", 
 
 if archivo_imagen:
     try:
-        contenido = archivo_imagen.read()
-        imagen = Image.open(BytesIO(contenido))
-        imagen.load()  # Forzar la carga
-
+        imagen = Image.open(archivo_imagen)  # abrir directo, sin BytesIO ni .read()
         st.image(imagen, caption="Imagen cargada")
-
+        
         imagen_preparada = preparar_imagen_vgg16(imagen)
-
         modelo = cargar_modelo()
         salida_predicha = modelo.predict(imagen_preparada)
 
@@ -73,8 +69,6 @@ if archivo_imagen:
             st.bar_chart(salida_predicha[0])
 
     except UnidentifiedImageError:
-        st.error("El archivo no es una imagen válida o está corrupto.")
+        st.error("No se pudo cargar la imagen: formato no reconocido o archivo corrupto.")
     except Exception as e:
         st.error(f"No se pudo cargar o procesar la imagen. Detalles: {e}")
-
-
