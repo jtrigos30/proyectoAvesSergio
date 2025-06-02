@@ -10,23 +10,30 @@ MODEL_PATH = "model_Sergio_v2_os.keras"
 DOWNLOAD_URL = "https://drive.google.com/uc?id=1RbJjbe6bWn-rXbxIwHijYoNezuB1vQl6"
 
 @st.cache_resource
+@st.cache_resource
 def cargar_modelo():
+    st.write("Verificando si el modelo existe en ruta:", MODEL_PATH)
     if not os.path.exists(MODEL_PATH):
-        with st.spinner("Descargando modelo desde Google Drive..."):
-            gdown.download(DOWNLOAD_URL, MODEL_PATH, quiet=False)
+        st.write("Modelo no encontrado, descargando...")
+        gdown.download(DOWNLOAD_URL, MODEL_PATH, quiet=False)
+    else:
+        st.write("Modelo encontrado, tamaño:", os.path.getsize(MODEL_PATH), "bytes")
 
-    # Validar si el archivo es sospechosamente pequeño (posiblemente falló la descarga)
-    if os.path.exists(MODEL_PATH) and os.path.getsize(MODEL_PATH) < 10000:
-        st.warning("⚠️ El archivo del modelo parece estar corrupto o incompleto. Eliminando y reintentando...")
-        os.remove(MODEL_PATH)
-        with st.spinner("Descargando nuevamente el modelo..."):
+    if os.path.exists(MODEL_PATH):
+        size = os.path.getsize(MODEL_PATH)
+        st.write(f"Tamaño del archivo del modelo: {size} bytes")
+        if size < 10000:
+            st.warning("Archivo sospechosamente pequeño. Borrando y reintentando descarga.")
+            os.remove(MODEL_PATH)
             gdown.download(DOWNLOAD_URL, MODEL_PATH, quiet=False)
-        st.write("✅ Modelo descargado. Tamaño:", os.path.getsize(MODEL_PATH), "bytes")
+            st.write("Descarga completada nuevamente")
+    else:
+        st.error("El archivo del modelo no existe después de la descarga.")
 
-    with st.spinner("Cargando modelo..."):
-        modelo = tf.keras.models.load_model(MODEL_PATH)
+    st.write("Intentando cargar el modelo...")
+    modelo = tf.keras.models.load_model(MODEL_PATH)
+    st.write("Modelo cargado exitosamente.")
     return modelo
-
 # --- Preprocesamiento para VGG16 ---
 def preparar_imagen_vgg16(imagen):
     imagen = imagen.convert("RGB")
