@@ -32,32 +32,4 @@ def preparar_imagen_vgg16(imagen):
 etiquetas = [
     'ZANATE MAYOR', 'ZANATE CARIBEÑO', 'ZANATE SP.', 'CHANGO VENTRIRROJO', 'CHANGO ORIOLINO',
     'VARILLERO CAPUCHINO', 'CHIPE ARROYERO', 'CHIPE CHARQUERO',
-    'CHIPE ARROYERO/CHARQUERO', 'CHIPE ALAS AMARILLAS'
-]
-
-# --- Título de la aplicación ---
-st.title("🦜 Clasificación de Aves con VGG16 + Keras")
-st.write("Sube una imagen de un ave para predecir su especie.")
-
-# --- Cargar imagen del usuario ---
-archivo_imagen = st.file_uploader("Selecciona una imagen", type=["jpg", "jpeg", "png"])
-
-if archivo_imagen:
-    imagen = Image.open(archivo_imagen)
-    st.image(imagen, caption="Imagen cargada", use_container_width=True)
-
-    imagen_preparada = preparar_imagen_vgg16(imagen)
-
-    # --- Cargar modelo e inferencia ---
-    modelo = cargar_modelo()
-    salida_predicha = modelo.predict(imagen_preparada)
-
-    clase = int(np.argmax(salida_predicha))
-    confianza = float(np.max(salida_predicha))
-
-    st.success(f"🧠 Predicción: *{etiquetas[clase]}*")
-    st.info(f"📊 Confianza del modelo: *{confianza*100:.2f}%*")
-
-    # --- Visualización opcional ---
-    if st.checkbox("Mostrar probabilidades por clase"):
-        st.bar_chart(salida_predicha[0])
+    'CHIPE ARROYERO/
