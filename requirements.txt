@@ -1,6 +1,5 @@
-numpy>=1.26.4
-Pillow>=9.4.0
+numpy==1.23.5
+Pillow==9.4.0
 tensorflow==2.10.0
-streamlit>=1.44.1
-gdown>=4.7.1
-keras==2.10.0  
+streamlit==1.25.0
+gdown==4.7.1
