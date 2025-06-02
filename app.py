@@ -8,7 +8,7 @@ from io import BytesIO
 
 # --- Ruta y descarga del modelo desde Google Drive ---
 MODEL_PATH = "model_Sergio_v2_os.keras"
-DOWNLOAD_URL = "https://drive.google.com/uc?id=1RbJjbe6bWn-rXbxIwHijYoNezuB1vQl6"
+DOWNLOAD_URL = "https://drive.google.com/file/d/1RbJjbe6bWn-rXbxIwHijYoNezuB1vQl6/view?usp=sharing"
 
 @st.cache_resource
 def cargar_modelo():
